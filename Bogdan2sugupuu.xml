@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<inimene saasta="1960">
+	<nimi>
+		Faina
+	</nimi>
+	<elukoht>
+		Venemaa, Staraya Russa
+	</elukoht>
+	<lapsed>
+		<inimene saasta="1980">
+			<nimi>
+				Nelli
+			</nimi>
+			<elukoht>
+				Venemaa, Staraya Russa
+			</elukoht>
+			<lapsed>
+				<inimene saasta="2007">
+					<nimi>
+						Bogdan
+					</nimi>
+					<elukoht>
+						Estonia, Tallinn
+					</elukoht>
+				</inimene>
+				<inimene saasta="2023">
+					<nimi>
+						Nazar
+					</nimi>
+					<elukoht>
+						Estonia, Tallinn
+					</elukoht>
+				</inimene>
+			</lapsed>
+		</inimene>
+		<inimene saasta="1978">
+			<nimi>
+				Igor
+			</nimi>
+			<elukoht>
+				Venemaa, Staraya Russa
+			</elukoht>
+			<lapsed>
+				<inimene saasta="2008">
+					<nimi>
+						Ilja
+					</nimi>
+					<elukoht>
+						Estonia, Tallinn
+					</elukoht>
+				</inimene>
+				<inimene saasta="2020">
+					<nimi>
+						Ivanna
+					</nimi>
+					<elukoht>
+						Estonia, Tallinn
+					</elukoht>
+				</inimene>
+			</lapsed>
+			
+		</inimene>
+	</lapsed>
+</inimene>
