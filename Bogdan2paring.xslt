@@ -5,7 +5,8 @@
 	<xsl:output method="xml" indent="yes"/>
 
 	<xsl:template match="/">
-		<strong>Näitame kõik nimed</strong>
+		<!-- Вывод всех имён и годов рождения -->
+		<strong>Näitame kõik nimed ja sünniaastad</strong>
 		<ul>
 			<xsl:for-each select="//inimene">
 				<xsl:sort select="@saasta" order="descending"/>
@@ -18,44 +19,75 @@
 			</xsl:for-each>
 		</ul>
 
-		<strong>Kõik andmed tabelina</strong>
-		<table border="1">
-			<tr>
+		<!-- Таблица с родителями, бабушками/дедушками, детьми и возрастами -->
+		<strong>Kõik andmed tabelina (vanem, vanavanaema, lapsevanema vanus)</strong>
+		<table border="1" cellpadding="5" cellspacing="0">
+			<tr bgcolor="#cccccc">
 				<th>Nimi</th>
-				<th>Laps</th>
+				<th>Vanem</th>
+				<th>Vanaema</th>
+				<th>Laps (nimi (vanus))</th>
 				<th>Sünniaasta</th>
 				<th>Elukoht</th>
 				<th>Vanus (2025)</th>
+				<th>Vanus lapse sünniaastal (vanem)</th>
 			</tr>
 
 			<xsl:for-each select="//inimene">
 				<xsl:sort select="@saasta" order="descending"/>
 				<tr>
-					<!-- Жёлтый фон, если ≥ 2 детей -->
+					<!-- Жёлтый фон, если >= 2 детей -->
 					<xsl:attribute name="style">
 						<xsl:if test="count(lapsed/inimene) &gt;= 2">background-color:yellow;</xsl:if>
 					</xsl:attribute>
 
-					<!-- Имя с красным цветом, если содержит "a" -->
+					<!-- Имя с зелёным фоном, если длина < 7, и красным цветом, если содержит 'a' -->
 					<td>
+						<xsl:variable name="nimi" select="normalize-space(nimi)"/>
+						<xsl:attribute name="style">
+							<xsl:if test="string-length($nimi) &lt; 7">background-color:lightgreen;</xsl:if>
+						</xsl:attribute>
+
 						<xsl:choose>
-							<xsl:when test="contains(normalize-space(nimi), 'a') or contains(normalize-space(nimi), 'A')">
+							<xsl:when test="contains($nimi, 'a') or contains($nimi, 'A')">
 								<span style="color:red">
-									<xsl:value-of select="normalize-space(nimi)"/>
+									<xsl:value-of select="$nimi"/>
 								</span>
 							</xsl:when>
 							<xsl:otherwise>
-								<xsl:value-of select="normalize-space(nimi)"/>
+								<xsl:value-of select="$nimi"/>
 							</xsl:otherwise>
 						</xsl:choose>
 					</td>
 
+					<!-- Vanem (родитель) -->
+					<td>
+						<xsl:choose>
+							<xsl:when test="parent::lapsed/parent::inimene">
+								<xsl:value-of select="normalize-space(parent::lapsed/parent::inimene/nimi)"/>
+							</xsl:when>
+							<xsl:otherwise>—</xsl:otherwise>
+						</xsl:choose>
+					</td>
+
+					<!-- Vanavanaema (бабушка/дедушка) -->
+					<td>
+						<xsl:choose>
+							<xsl:when test="parent::lapsed/parent::inimene/parent::lapsed/parent::inimene">
+								<xsl:value-of select="normalize-space(parent::lapsed/parent::inimene/parent::lapsed/parent::inimene/nimi)"/>
+							</xsl:when>
+							<xsl:otherwise>—</xsl:otherwise>
+						</xsl:choose>
+					</td>
+
+					<!-- Laps (nimi (vanus)) -->
 					<td>
 						<xsl:for-each select="lapsed/inimene">
-							<xsl:value-of select="normalize-space(nimi)"/>
+							<xsl:value-of select="normalize-space(nimi)"/> (<xsl:value-of select="2025 - @saasta"/>)
 							<xsl:if test="position() != last()">, </xsl:if>
 						</xsl:for-each>
 					</td>
+
 					<td>
 						<xsl:value-of select="@saasta"/>
 					</td>
@@ -65,23 +97,55 @@
 					<td>
 						<xsl:value-of select="2025 - @saasta"/>
 					</td>
+
+					<!-- Vanus lapse sünniaastal (vanem) -->
+					<td>
+						<xsl:choose>
+							<xsl:when test="parent::lapsed/parent::inimene">
+								<xsl:value-of select="parent::lapsed/parent::inimene/@saasta - @saasta"/>
+							</xsl:when>
+							<xsl:otherwise>—</xsl:otherwise>
+						</xsl:choose>
+					</td>
 				</tr>
 			</xsl:for-each>
 		</table>
 
+		<!-- Список имён с >= 2 детьми -->
+		<strong>Isikud, kellel vähemalt 2 last</strong>
+		<ul>
+			<xsl:for-each select="//inimene[count(lapsed/inimene) &gt;= 2]">
+				<li>
+					<xsl:value-of select="normalize-space(nimi)"/>
+				</li>
+			</xsl:for-each>
+		</ul>
+
+		<!-- Возраст ребёнка относительно родителя -->
 		<strong>Mäng: iga inimese vanus oma vanema sünniaastal</strong>
 		<ul>
 			<xsl:for-each select="//inimene">
 				<li>
 					<xsl:value-of select="normalize-space(nimi)"/>
-					<xsl:if test="../..">
+					<xsl:if test="parent::lapsed/parent::inimene">
 						- lapsevanema vanus oli
-						<xsl:value-of select="../../@saasta - @saasta"/> aastat vana
+						<xsl:value-of select="parent::lapsed/parent::inimene/@saasta - @saasta"/> aastat vana
 					</xsl:if>
 				</li>
 			</xsl:for-each>
 		</ul>
 
+		<!-- Поиск имён с длиной >= 5 и содержащих букву 'a' -->
+		<strong>Поиск имён с длиной ≥ 5 и содержащих букву 'a'</strong>
+		<ul>
+			<xsl:for-each select="//inimene[string-length(normalize-space(nimi)) &gt;= 5 and contains(translate(normalize-space(nimi), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'a')]">
+				<li>
+					<xsl:value-of select="normalize-space(nimi)"/>
+				</li>
+			</xsl:for-each>
+		</ul>
+
+		<!-- Самый старый человек -->
 		<strong>Mina oma ülesanne: kõige vanem inimene</strong>
 		<xsl:for-each select="//inimene">
 			<xsl:sort select="@saasta" order="ascending"/>
@@ -94,26 +158,27 @@
 			</xsl:if>
 		</xsl:for-each>
 
+		<!-- Пример работы с функциями substring, starts-with -->
 		<strong>
 			<ol>
 				<li>
-					Count - kogus - üldkogus - kõik nimed jadas:
+					Count - kogus - kõik nimed jadas:
 					<xsl:value-of select="count(//nimi)"/>
 				</li>
 				<li>
-					substring() - eralda kolm esimest tähte nimest
+					Substring - kolm esimest tähte nimest:
 					<xsl:for-each select="//inimene">
 						<xsl:value-of select="substring(normalize-space(nimi), 1, 3)"/> |
 					</xsl:for-each>
 				</li>
 				<li>
-					substring() - eralda kolm viimast tähte nimest
+					Substring - kolm viimast tähte nimest:
 					<xsl:for-each select="//inimene">
 						<xsl:value-of select="substring(normalize-space(nimi), string-length(normalize-space(nimi)) - 2, 3)"/> |
 					</xsl:for-each>
 				</li>
 				<li>
-					starts-with "A"
+					Starts-with "A":
 					<xsl:for-each select="//inimene[starts-with(normalize-space(nimi), 'A')]">
 						<xsl:value-of select="normalize-space(nimi)"/> ,
 					</xsl:for-each>
