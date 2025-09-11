@@ -21,20 +21,7 @@
 			</head>
 			<body>
 
-				<!-- Vanaema nimi ja tema lapsed -->
-				<h2>Vanaema nimi ja tema lapsed</h2>
-				<ul>
-					<xsl:for-each select="//inimene[parent::lapsed/parent::inimene[parent::lapsed/parent::inimene]]">
-						<li>
-							<xsl:value-of select="parent::lapsed/parent::inimene/parent::lapsed/parent::inimene/nimi"/>
-							<xsl:text>; </xsl:text>
-							<xsl:for-each select="parent::lapsed/parent::inimene/parent::lapsed/parent::inimene/lapsed/inimene">
-								<xsl:value-of select="normalize-space(nimi)"/>
-								<xsl:if test="position() != last()">, </xsl:if>
-							</xsl:for-each>
-						</li>
-					</xsl:for-each>
-				</ul>
+				
 
 				<!-- Tabel kõikidest inimestest -->
 				<h2>Tabel kõikidest inimestest</h2>
